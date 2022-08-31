@@ -43,7 +43,7 @@
   background-size: cover;
 }
 .header-wrapper {
-  width: 1500px;
+  width: 1400px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -171,13 +171,13 @@
   margin-left: 3px;
 }
 .main {
-  width: 1500px;
+  width: 1400px;
   margin: 0 auto;
   padding-top: 15px;
   display: flex;
 }
 .main-container {
-  width: calc(1500px - 220px - 250px);
+  width: calc(1400px - 220px - 250px);
   padding: 0 15px;
   align-self: flex-start;
 }
@@ -233,7 +233,6 @@
 .main-left--motto {
   padding: 15px;
   font-size: 13px;
-  text-shadow: 0 5px 2px #666;
 }
 .main-left--motto > p:last-child {
   margin-top: 5px;
@@ -396,7 +395,7 @@
   font-size: 12px;
 }
 .footer {
-  width: 1500px;
+  width: 1400px;
   height: 0px;
   margin: 0 auto;
 }
