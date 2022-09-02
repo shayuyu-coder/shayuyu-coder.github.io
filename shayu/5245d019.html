@@ -445,8 +445,7 @@ pre:active {
 <li>getset <key><value> 以新换旧，设置了新值同时获得旧值</li>
 </ul>
 <h4 id="原子性："><a href="#原子性：" class="headerlink" title="原子性："></a>原子性：</h4><p>所谓原子操作是指不会被线程调度机制打断的操作，这种操作一旦开始，就一直运行到结束，中间不会有任何context switch（切换到另一个进程）<br>1、在单线程中，能够在单条指令中完成的操作都可以认为是“原子操作”（注意这里有引号），因为中断只能发生于指令之间<br>2、在多线程中，不能被其他进程打断的操作就叫原子操作<br>Redis单命令的原子性主要得益于Redis的单线程</p>
-<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><pre><code>string的数据结构为简单动态字符串，是可以修改的字符串，内部结构实现上类似于Java的ArrayList，采用预分配冗余空间的方式来减少内存的频繁分配。
-</code></pre>
+<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>string的数据结构为简单动态字符串，是可以修改的字符串，内部结构实现上类似于Java的ArrayList，采用预分配冗余空间的方式来减少内存的频繁分配。</p>
 <p><img src="https://xingqiu-tuchuang-1256524210.cos.ap-shanghai.myqcloud.com/4496/image-20220727123548075.png" alt="image-20220727123548075"><br>如图中所示，内部为当前字符串实际分配的空间capacity 一般要高于实际字符串长度len，当字符串长度小于1M时，扩容都是加倍现有的空间，如果超过1M，扩容一次只会多扩1M的空间，需要注意的是，字符串最大长度为512M</p>
 </blockquote>
 <h1 id="List（Redis列表）"><a href="#List（Redis列表）" class="headerlink" title="List（Redis列表）"></a>List（Redis列表）</h1><p>:::danger<br>redis列表是简单的字符串列表，按照插入顺序排序，你可以添加一个元素到列表的头部（左边）或者尾部（右边）<br><img src="https://xingqiu-tuchuang-1256524210.cos.ap-shanghai.myqcloud.com/4496/image-20220727123852045.png" alt="image-20220727123852045"><br>他的底层实际是个双向链表，对两端的操作性能很高，通过索引下标的操作中间节点的性能会较差。</p>
@@ -508,8 +507,7 @@ redis hash是一个string类型的field和value的映射表，hash特别适合�
 <li>zount<key><min><max> 统计该集合，分数区间内的元素个数</li>
 <li>zrank <key><value> 返回该值在集合中的排名，从0开始</li>
 </ul>
-<h2 id="数据结构-4"><a href="#数据结构-4" class="headerlink" title="数据结构"></a>数据结构</h2><pre><code>Sorted Set（zset）是redis提供的一个非常特别的数据结构，一方面它等价于java的数据结构Map&lt;String,Double&gt;，可以给每一个元素value赋予一个权值score，另一方面又类似于TreeSet，内部的元素会按照权重score进行排序，可以得到每个元素的名次，还可以通过score的范围来获取元素的列表。
-</code></pre>
+<h2 id="数据结构-4"><a href="#数据结构-4" class="headerlink" title="数据结构"></a>数据结构</h2><p>Sorted Set（zset）是redis提供的一个非常特别的数据结构，一方面它等价于java的数据结构Map&lt;String,Double&gt;，可以给每一个元素value赋予一个权值score，另一方面又类似于TreeSet，内部的元素会按照权重score进行排序，可以得到每个元素的名次，还可以通过score的范围来获取元素的列表。</p>
 <p>zset底层使用了两个数据结构<br>1、hash，hash的作用就是关联元素value和权重score，保障元素value的唯一性，可以通过元素value找到相应的score值。<br>2、跳跃表，跳跃表的目的在于给元素value排序，根据score的范围获取元素列表。<br>:::<br>**跳跃表	**</p>
 <p>有序集合在生活中比较常见，例如根据成绩对学生排名，根据得分对玩家排名等。对于有序集合的底层实现，可以用数组、平衡树、链表等。数组不便元素的插入、删除；平衡树或红黑树虽然效率高但结构复杂；链表查询需要遍历所有效率低。<br>Redis采用的是跳跃表。跳跃表效率堪比红黑树，实现远比红黑树简单。<br>2、实例<br>    对比有序链表和跳跃表，从链表中查询出51<br>（1） 有序链表<br><img src="https://xingqiu-tuchuang-1256524210.cos.ap-shanghai.myqcloud.com/4496/image-20220727150205067.png" alt="image-20220727150205067"><br>要查找值为51的元素，需要从第一个元素开始依次查找、比较才能找到。共需要6次比较。<br>（2） 跳跃表<br><img src="https://xingqiu-tuchuang-1256524210.cos.ap-shanghai.myqcloud.com/4496/image-20220727150256931.png" alt="image-20220727150256931"><br>从第2层开始，1节点比51节点小，向后比较。<br>21节点比51节点小，继续向后比较，后面就是NULL了，所以从21节点向下到第1层<br>在第1层，41节点比51节点小，继续向后，61节点比51节点大，所以从41向下<br>在第0层，51节点为要查找的节点，节点被找到，共查找4次。<br>（我自己的理解就是跳一个进行比较，比目标值小就又跳一个比较，比目标值大就比较前一个值。)<br>从此可以看出跳跃表比有序链表效率要高</p>
 <h1 id="Redis文件配置"><a href="#Redis文件配置" class="headerlink" title="Redis文件配置"></a>Redis文件配置</h1><blockquote>
